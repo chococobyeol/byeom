@@ -140,6 +140,10 @@
                 const cell = document.createElement('div');
                 cell.className = 'character-cell';
                 
+                // 캐릭터 이미지를 담을 div
+                const imageContainer = document.createElement('div');
+                imageContainer.className = 'image-container';
+                
                 const bodyImg = document.createElement('img');
                 bodyImg.src = 'body/body_original.png';
                 bodyImg.alt = `Character ${i} Body`;
@@ -148,8 +152,15 @@
                 headImg.alt = `Character ${i} Head`;
                 headImg.dataset.characterId = i;
                 
-                cell.appendChild(bodyImg);
-                cell.appendChild(headImg);
+                // 번호 표시 div
+                const numberLabel = document.createElement('div');
+                numberLabel.className = 'character-number';
+                numberLabel.textContent = i;
+                
+                imageContainer.appendChild(bodyImg);
+                imageContainer.appendChild(headImg);
+                cell.appendChild(imageContainer);
+                cell.appendChild(numberLabel);
                 grid.appendChild(cell);
             }
             updateCharacterGrid();
