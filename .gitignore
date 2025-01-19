@@ -15,11 +15,6 @@
 /grayscale_*.png
 /original*.png
 
-# 필요한 이미지 폴더 외의 다른 폴더 제외
-/**/
-!/body/
-!/head/
-
 # 기타 제외할 파일들
 .DS_Store
 *.log
@@ -31,4 +26,8 @@ __pycache__/
 *.kra~
 
 # Krita 자동저장 파일 제외
-*-autosave.kra 
+*-autosave.kra
+
+# 필요한 폴더만 포함
+!body/
+!head/ 
