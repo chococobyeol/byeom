@@ -30,4 +30,7 @@ __pycache__/
 
 # 필요한 폴더만 포함
 !body/
-!head/ 
+!head/
+
+# Python 가상환경
+venv/ 
