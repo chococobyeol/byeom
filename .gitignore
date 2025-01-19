@@ -26,4 +26,9 @@
 .vscode/
 .idea/
 __pycache__/
-*.pyc 
+*.pyc
+*.kra
+*.kra~
+
+# Krita 자동저장 파일 제외
+*-autosave.kra 
