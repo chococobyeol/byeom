@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>바염</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>바염</h1>
+        <div class="color-groups">
+            <div class="color-group">
+                <div class="group-title">1만전 염색</div>
+                <div class="color-selector" id="colorSelector1"></div>
+            </div>
+            <div class="color-group">
+                <div class="group-title">5만전 염색</div>
+                <div class="color-selector" id="colorSelector5"></div>
+            </div>
+        </div>
+        <div class="character-grid-container">
+            <div class="character-grid" id="characterGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        const COLORS = {
+            cheap: [
+                { id: 'original', name: '원래색깔', value: 'original', price: 0 },
+                { id: 'green', name: '녹색', value: 'green', price: 10000 },
+                { id: 'royalblue', name: '감청색', value: 'royalblue', price: 10000 },
+                { id: 'graybrown', name: '회갈색', value: 'graybrown', price: 10000 },
+                { id: 'redbrown', name: '적갈색', value: 'redbrown', price: 10000 },
+                { id: 'ochre', name: '황토색', value: 'ochre', price: 10000 },
+                { id: 'lightpurple', name: '연보라색', value: 'lightpurple', price: 10000 },
+                { id: 'purple', name: '보라색', value: 'purple', price: 10000 },
+                { id: 'sea', name: '바다색', value: 'sea', price: 10000 }
+            ],
+            expensive: [
+                { id: 'white', name: '흰색', value: 'white', price: 50000 },
+                { id: 'tangerine', name: '귤색', value: 'tangerine', price: 50000 },
+                { id: 'navyblue', name: '짙은곤색', value: 'navyblue', price: 50000 },
+                { id: 'gray', name: '회색', value: 'gray', price: 50000 },
+                { id: 'orange', name: '오렌지색', value: 'orange', price: 50000 },
+                { id: 'deepbrown', name: '갈색', value: 'deepbrown', price: 50000 },
+                { id: 'lightbrown', name: '연갈색', value: 'lightbrown', price: 50000 },
+                { id: 'darkgray', name: '짙은회색', value: 'darkgray', price: 50000 },
+                { id: 'lightgray', name: '밝은회색', value: 'lightgray', price: 50000 }
+            ]
+        };
+
+        let selectedColor = 'original';
+
+        // 이미지 존재 여부 확인 및 대체 이미지 경로 반환
+        async function checkImageExists(imagePath) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(imagePath);
+                img.onerror = () => {
+                    console.log(`Color not implemented: ${imagePath}, using original`);
+                    resolve(imagePath.replace(selectedColor, 'original'));
+                };
+                img.src = imagePath;
+            });
+        }
+
+        // 캐릭터 그리드 업데이트
+        async function updateCharacterGrid() {
+            const headImages = document.querySelectorAll('.character-cell img:nth-child(2)');
+            for (const img of headImages) {
+                const characterId = img.dataset.characterId;
+                const coloredPath = `head/${selectedColor}/${selectedColor}_head_${characterId}.png`;
+                
+                // 선택된 색상의 이미지를 로드 시도
+                const finalPath = await checkImageExists(coloredPath);
+                img.src = finalPath;
+                
+                // 이미지 로드 실패시 original로 대체
+                img.onerror = () => {
+                    console.log(`Failed to load: ${finalPath}, falling back to original`);
+                    img.src = `head/original/original_head_${characterId}.png`;
+                };
+            }
+        }
+
+        // 색상 선택 버튼 생성
+        function createColorButtons() {
+            const colorSelector1 = document.getElementById('colorSelector1');
+            const colorSelector5 = document.getElementById('colorSelector5');
+            
+            COLORS.cheap.forEach(color => {
+                const button = createColorButton(color);
+                colorSelector1.appendChild(button);
+            });
+            
+            COLORS.expensive.forEach(color => {
+                const button = createColorButton(color);
+                colorSelector5.appendChild(button);
+            });
+        }
+
+        function createColorButton(color) {
+            const button = document.createElement('button');
+            button.className = `color-button ${color.value === selectedColor ? 'selected' : ''}`;
+            
+            const preview = document.createElement('span');
+            preview.className = `color-preview preview-${color.value}`;
+            
+            const text = document.createElement('span');
+            text.textContent = color.name;
+            
+            button.appendChild(preview);
+            button.appendChild(text);
+            
+            button.onclick = () => {
+                selectedColor = color.value;
+                updateColorButtons();
+                updateCharacterGrid();
+            };
+            
+            return button;
+        }
+
+        // 색상 버튼 상태 업데이트
+        function updateColorButtons() {
+            const buttons = document.querySelectorAll('.color-button');
+            buttons.forEach(button => {
+                const colorName = button.querySelector('span:last-child').textContent;
+                const isSelected = [...COLORS.cheap, ...COLORS.expensive]
+                    .find(c => c.value === selectedColor)?.name === colorName;
+                button.classList.toggle('selected', isSelected);
+            });
+        }
+
+        // 캐릭터 그리드 생성
+        function createCharacterGrid() {
+            const grid = document.getElementById('characterGrid');
+            for (let i = 1; i <= 102; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'character-cell';
+                
+                const bodyImg = document.createElement('img');
+                bodyImg.src = 'body/body_original.png';
+                bodyImg.alt = `Character ${i} Body`;
+                
+                const headImg = document.createElement('img');
+                headImg.alt = `Character ${i} Head`;
+                headImg.dataset.characterId = i;
+                
+                cell.appendChild(bodyImg);
+                cell.appendChild(headImg);
+                grid.appendChild(cell);
+            }
+            updateCharacterGrid();
+        }
+
+        // 초기화
+        createColorButtons();
+        createCharacterGrid();
+    </script>
+</body>
+</html> 
