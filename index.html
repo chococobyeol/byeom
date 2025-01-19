@@ -52,6 +52,16 @@
 
         let selectedColor = 'original';
 
+        // 이미지 로딩 Promise 생성
+        function loadImage(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = () => reject(new Error(`Failed to load image: ${src}`));
+                img.src = src;
+            });
+        }
+
         // 이미지 존재 여부 확인 및 대체 이미지 경로 반환
         async function checkImageExists(imagePath) {
             return new Promise((resolve) => {
@@ -65,23 +75,31 @@
             });
         }
 
-        // 캐릭터 그리드 업데이트
+        // 이미지 로딩 최적화
         async function updateCharacterGrid() {
             const headImages = document.querySelectorAll('.character-cell img:nth-child(2)');
-            for (const img of headImages) {
+            const loadPromises = Array.from(headImages).map(async (img) => {
                 const characterId = img.dataset.characterId;
                 const coloredPath = `head/${selectedColor}/${selectedColor}_head_${characterId}.png`;
-                
-                // 선택된 색상의 이미지를 로드 시도
-                const finalPath = await checkImageExists(coloredPath);
-                img.src = finalPath;
-                
-                // 이미지 로드 실패시 original로 대체
-                img.onerror = () => {
-                    console.log(`Failed to load: ${finalPath}, falling back to original`);
+                try {
+                    await loadImage(coloredPath);
+                    img.src = coloredPath;
+                } catch {
                     img.src = `head/original/original_head_${characterId}.png`;
-                };
-            }
+                }
+            });
+            await Promise.all(loadPromises);
+        }
+
+        // 이미지 프리로딩
+        function preloadImages() {
+            const colors = [...COLORS.cheap, ...COLORS.expensive];
+            colors.forEach(color => {
+                for(let i = 1; i <= 102; i++) {
+                    const img = new Image();
+                    img.src = `head/${color.value}/${color.value}_head_${i}.png`;
+                }
+            });
         }
 
         // 색상 선택 버튼 생성
